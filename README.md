@@ -24,13 +24,13 @@ throughline isn't an "AI memory" product — it's a **vendor-neutral context pro
 ## Install
 
 ```bash
-npm install -g throughline      # CLI + library
+npm install -g @hiromima/throughline      # CLI + library
 ```
 
 ## Quickstart — library
 
 ```ts
-import { Stream, googleDriveAdapter } from "throughline";
+import { Stream, googleDriveAdapter } from "@hiromima/throughline";
 
 const stream = new Stream({
   root: googleDriveAdapter().resolveRoot(),   // ~/.../My Drive/.throughline
@@ -70,7 +70,7 @@ just resolves the local mount path (nothing touches any cloud API):
 | Local (single machine / tests) | `localAdapter(path)` | — | n/a |
 
 ```ts
-import { googleDriveAdapter, mountedAdapter } from "throughline";
+import { googleDriveAdapter, mountedAdapter } from "@hiromima/throughline";
 
 googleDriveAdapter().resolveRoot();                     // autodetected My Drive
 googleDriveAdapter({ base: "/Volumes/Work/My Drive" }); // explicit mount

@@ -1,6 +1,9 @@
 {
-  "name": "throughline",
+  "name": "@hiromima/throughline",
   "version": "0.1.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "The cross-machine cognitive bus for AI agents. Your Dropbox/Drive is the only backend — no server, no database. Append-only JSONL that any filesystem-capable AI can read and append.",
   "keywords": [
     "ai",
@@ -42,6 +45,7 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "prepublishOnly": "npm run build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
