@@ -3,6 +3,7 @@
 **The cross-machine cognitive bus for AI agents.**
 The folder you already sync is the only backend — no server, no database. Append-only JSONL that any filesystem-capable AI can read and append.
 
+[![npm](https://img.shields.io/npm/v/@hiromima/throughline)](https://www.npmjs.com/package/@hiromima/throughline)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)
 
@@ -14,9 +15,9 @@ Every AI memory tool ([mem0](https://github.com/mem0ai/mem0), [letta](https://gi
 
 throughline isn't an "AI memory" product — it's a **vendor-neutral context protocol**:
 
-- **Zero infrastructure** — no daemon, no server, no database. The sync service you already run (Dropbox / Google Drive / Syncthing / iCloud) *is* the transport.
+- **Zero infrastructure** — no daemon, no server, no database. The sync service you already run (Dropbox / Google Drive / Syncthing / iCloud) _is_ the transport.
 - **Cross-machine** — laptop, desktop, and home server share one stream. Every comparable tool is single-machine.
-- **AI-neutral** — Claude Code, Claude Desktop, Codex, Gemini CLI… anything that can read a file can join. One protocol, thin per-AI adapters — the *LSP model* for AI context.
+- **AI-neutral** — Claude Code, Claude Desktop, Codex, Gemini CLI… anything that can read a file can join. One protocol, thin per-AI adapters — the _LSP model_ for AI context.
 - **append-only JSONL** — torn-write resilient, mergeable across machines, greppable.
 
 > **Honest boundary:** any AI that can reach the local filesystem participates. A pure cloud chat (e.g. vanilla ChatGPT web) cannot — its MCP is remote-only — so it needs a bridge that breaks the zero-infra property. See [`spec/PROTOCOL.md`](spec/PROTOCOL.md) §6.
@@ -24,7 +25,11 @@ throughline isn't an "AI memory" product — it's a **vendor-neutral context pro
 ## Install
 
 ```bash
-npm install -g @hiromima/throughline      # CLI + library
+# CLI (global) — provides the `throughline` command
+npm install -g @hiromima/throughline
+
+# Library (in a project) — for `import { Stream } from "@hiromima/throughline"`
+npm install @hiromima/throughline
 ```
 
 ## Quickstart — library
@@ -33,7 +38,7 @@ npm install -g @hiromima/throughline      # CLI + library
 import { Stream, googleDriveAdapter } from "@hiromima/throughline";
 
 const stream = new Stream({
-  root: googleDriveAdapter().resolveRoot(),   // ~/.../My Drive/.throughline
+  root: googleDriveAdapter().resolveRoot(), // ~/.../My Drive/.throughline
   source: "my-agent",
 });
 
@@ -61,20 +66,20 @@ throughline never syncs anything itself — it rides a folder your sync app keep
 in sync across machines. Pick the adapter for the service you already use; each
 just resolves the local mount path (nothing touches any cloud API):
 
-| Service | Adapter | Default / detection | Override |
-|---------|---------|---------------------|----------|
-| Dropbox | `dropboxAdapter()` | `~/Dropbox/.throughline` | `DROPBOX_DIR` or `{ base }` |
-| Google Drive | `googleDriveAdapter()` | autodetects `~/Library/CloudStorage/GoogleDrive-*/My Drive` (macOS) or `~/Google Drive` | `GOOGLE_DRIVE_DIR` or `{ base }` |
-| iCloud Drive | `icloudAdapter()` | `~/Library/Mobile Documents/com~apple~CloudDocs/.throughline` | `ICLOUD_DIR` or `{ base }` |
-| Syncthing / any folder | `mountedAdapter(path)` | — (you pass the synced folder) | n/a |
-| Local (single machine / tests) | `localAdapter(path)` | — | n/a |
+| Service                        | Adapter                | Default / detection                                                                     | Override                         |
+| ------------------------------ | ---------------------- | --------------------------------------------------------------------------------------- | -------------------------------- |
+| Dropbox                        | `dropboxAdapter()`     | `~/Dropbox/.throughline`                                                                | `DROPBOX_DIR` or `{ base }`      |
+| Google Drive                   | `googleDriveAdapter()` | autodetects `~/Library/CloudStorage/GoogleDrive-*/My Drive` (macOS) or `~/Google Drive` | `GOOGLE_DRIVE_DIR` or `{ base }` |
+| iCloud Drive                   | `icloudAdapter()`      | `~/Library/Mobile Documents/com~apple~CloudDocs/.throughline`                           | `ICLOUD_DIR` or `{ base }`       |
+| Syncthing / any folder         | `mountedAdapter(path)` | — (you pass the synced folder)                                                          | n/a                              |
+| Local (single machine / tests) | `localAdapter(path)`   | —                                                                                       | n/a                              |
 
 ```ts
 import { googleDriveAdapter, mountedAdapter } from "@hiromima/throughline";
 
-googleDriveAdapter().resolveRoot();                     // autodetected My Drive
+googleDriveAdapter().resolveRoot(); // autodetected My Drive
 googleDriveAdapter({ base: "/Volumes/Work/My Drive" }); // explicit mount
-mountedAdapter("/home/me/Sync/.throughline");           // Syncthing folder
+mountedAdapter("/home/me/Sync/.throughline"); // Syncthing folder
 ```
 
 The interface is just `resolveRoot()` + `health()`, so adding a new backend
@@ -85,16 +90,24 @@ The interface is just `resolveRoot()` + `health()`, so adding a new backend
 Every event is one JSONL line:
 
 ```json
-{"ts":"2026-06-02T01:00:00Z","schema":"throughline/v1","kind":"cognitive","source":"codex","machine":"laptop","type":"milestone","summary":"shipped v1"}
+{
+  "ts": "2026-06-02T01:00:00Z",
+  "schema": "throughline/v1",
+  "kind": "cognitive",
+  "source": "codex",
+  "machine": "laptop",
+  "type": "milestone",
+  "summary": "shipped v1"
+}
 ```
 
 `kind` is the load-bearing field:
 
-| kind | meaning | injected into agent context? |
-|------|---------|------------------------------|
-| `cognitive` | decisions, progress, findings, handoffs | ✅ yes |
-| `ops` | process supervision / automation logs | ❌ no (separate `ops-*.jsonl`) |
-| `telemetry` | high-frequency metrics | ❌ no |
+| kind        | meaning                                 | injected into agent context?   |
+| ----------- | --------------------------------------- | ------------------------------ |
+| `cognitive` | decisions, progress, findings, handoffs | ✅ yes                         |
+| `ops`       | process supervision / automation logs   | ❌ no (separate `ops-*.jsonl`) |
+| `telemetry` | high-frequency metrics                  | ❌ no                          |
 
 Readers inject **cognitive only**, so operational noise never drowns durable context. Legacy events without `kind` are inferred (`type`+`source` ⇒ cognitive).
 
@@ -102,14 +115,14 @@ Readers inject **cognitive only**, so operational noise never drowns durable con
 
 throughline is a protocol; each AI joins via a thin adapter (see [`adapters/`](adapters/)):
 
-| AI | read | status |
-|----|------|--------|
-| Claude Code | SessionStart hook → `throughline read` | `adapters/claude-code/` |
-| Codex | AGENTS.md instruction → `throughline read` | `adapters/codex/` |
-| Claude Desktop | Filesystem MCP (local stdio) | reads the folder directly |
-| ChatGPT (web) | remote MCP bridge | bridge tier — breaks zero-infra |
+| AI             | read                                       | status                          |
+| -------------- | ------------------------------------------ | ------------------------------- |
+| Claude Code    | SessionStart hook → `throughline read`     | `adapters/claude-code/`         |
+| Codex          | AGENTS.md instruction → `throughline read` | `adapters/codex/`               |
+| Claude Desktop | Filesystem MCP (local stdio)               | reads the folder directly       |
+| ChatGPT (web)  | remote MCP bridge                          | bridge tier — breaks zero-infra |
 
-**Cursor rule:** each AI keeps its *own* cursor file. Sharing a cursor between
+**Cursor rule:** each AI keeps its _own_ cursor file. Sharing a cursor between
 tools makes one mark events read and the other miss them — the one hard rule.
 
 ## Develop
