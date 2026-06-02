@@ -23,16 +23,16 @@ One JSONL line per event:
 
 ```jsonc
 {
-  "ts": "2026-06-02T01:00:00Z",   // ISO-8601 UTC, sort key (REQUIRED)
-  "schema": "throughline/v1",      // namespace + version (REQUIRED)
-  "kind": "cognitive",             // cognitive | ops | telemetry (REQUIRED)
-  "source": "codex",               // originating interface (REQUIRED)
-  "machine": "mac-mini",           // machine label (REQUIRED)
-  "type": "milestone",             // event type (REQUIRED; free-form allowed)
-  "summary": "shipped v1",         // one-line human summary (REQUIRED)
-  "session_id": "…",               // optional
-  "project": "…",                  // optional
-  "details": "…"                   // optional
+  "ts": "2026-06-02T01:00:00Z", // ISO-8601 UTC, sort key (REQUIRED)
+  "schema": "throughline/v1", // namespace + version (REQUIRED)
+  "kind": "cognitive", // cognitive | ops | telemetry (REQUIRED)
+  "source": "codex", // originating interface (REQUIRED)
+  "machine": "laptop", // machine label (REQUIRED)
+  "type": "milestone", // event type (REQUIRED; free-form allowed)
+  "summary": "shipped v1", // one-line human summary (REQUIRED)
+  "session_id": "…", // optional
+  "project": "…", // optional
+  "details": "…", // optional
 }
 ```
 
@@ -86,12 +86,12 @@ The stream is the protocol; each AI implements a thin adapter exposing two ops:
   reader's cursor into the agent's context.
 - **emit** — append an event with the agent's `source` and `kind:"cognitive"`.
 
-| Tier | AI | mechanism |
-|------|----|-----------|
-| native | Claude Code | SessionStart + PostToolUse hooks |
-| native | Codex | AGENTS.md instruction + shell |
-| native | Claude Desktop / Gemini CLI / OpenClaw | local MCP or hook |
-| **bridge** | ChatGPT (web/app) | remote MCP (HTTPS+OAuth) — ChatGPT's MCP is remote-only, so the local stream must be exposed over the internet. This **breaks zero-infra**; documented as a separate tier. |
+| Tier       | AI                                     | mechanism                                                                                                                                                                  |
+| ---------- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| native     | Claude Code                            | SessionStart + PostToolUse hooks                                                                                                                                           |
+| native     | Codex                                  | AGENTS.md instruction + shell                                                                                                                                              |
+| native     | Claude Desktop / Gemini CLI / OpenClaw | local MCP or hook                                                                                                                                                          |
+| **bridge** | ChatGPT (web/app)                      | remote MCP (HTTPS+OAuth) — ChatGPT's MCP is remote-only, so the local stream must be exposed over the internet. This **breaks zero-infra**; documented as a separate tier. |
 
 ## 7. Non-goals
 
